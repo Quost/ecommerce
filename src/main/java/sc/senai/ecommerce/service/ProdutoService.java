@@ -1,31 +1,39 @@
 package sc.senai.ecommerce.service;
 
 import sc.senai.ecommerce.model.Produto;
-import sc.senai.ecommerce.repository.ProdutoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import java.util.List;
 import java.util.Optional;
 
-@Service
 public class ProdutoService {
-    @Autowired
-    private ProdutoRepository produtoRepository;
+    private static final List<Produto> produtos = new ArrayList<>();
+    private static long idCounter = 1;
 
     public List<Produto> listarTodos() {
-        return produtoRepository.findAll();
+        return Collections.unmodifiableList(produtos);
     }
 
     public Optional<Produto> buscarPorId(Long id) {
-        return produtoRepository.findById(id);
+        return produtos.stream().filter(p -> p.getId().equals(id)).findFirst();
     }
 
     public Produto salvar(Produto produto) {
-        return produtoRepository.save(produto);
+        if (produto.getId() == null) {
+            produto.setId(idCounter++);
+            produtos.add(produto);
+        } else {
+            buscarPorId(produto.getId()).ifPresent(p -> {
+                p.setNome(produto.getNome());
+                p.setPreco(produto.getPreco());
+                p.setDescricao(produto.getDescricao());
+            });
+        }
+        return produto;
     }
 
     public void deletar(Long id) {
-        produtoRepository.deleteById(id);
+        produtos.removeIf(p -> p.getId().equals(id));
     }
 }

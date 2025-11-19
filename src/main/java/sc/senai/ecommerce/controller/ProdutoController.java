@@ -2,52 +2,34 @@ package sc.senai.ecommerce.controller;
 
 import sc.senai.ecommerce.model.Produto;
 import sc.senai.ecommerce.service.ProdutoService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@RestController
-@RequestMapping("/api/produtos")
 public class ProdutoController {
-    @Autowired
-    private ProdutoService produtoService;
+    private ProdutoService produtoService = new ProdutoService();
 
-    @GetMapping
+    // Exemplo de endpoints mockados
     public List<Produto> listarTodos() {
         return produtoService.listarTodos();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Produto> buscarPorId(@PathVariable Long id) {
-        return produtoService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public Produto buscarPorId(Long id) {
+        return produtoService.buscarPorId(id).orElse(null);
     }
 
-    @PostMapping
-    public ResponseEntity<Produto> criar(@RequestBody Produto produto) {
-        Produto novoProduto = produtoService.salvar(produto);
-        return ResponseEntity.ok(novoProduto);
+    public Produto criar(Produto produto) {
+        return produtoService.salvar(produto);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Produto> atualizar(@PathVariable Long id, @RequestBody Produto produto) {
-        return produtoService.buscarPorId(id)
-                .map(p -> {
-                    produto.setId(id);
-                    Produto atualizado = produtoService.salvar(produto);
-                    return ResponseEntity.ok(atualizado);
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public Produto atualizar(Long id, Produto produto) {
+        produto.setId(id);
+        return produtoService.salvar(produto);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public boolean deletar(Long id) {
         if (produtoService.buscarPorId(id).isPresent()) {
             produtoService.deletar(id);
-            return ResponseEntity.noContent().build();
+            return true;
         }
-        return ResponseEntity.notFound().build();
+        return false;
     }
 }
